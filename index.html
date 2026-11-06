@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background-color: #000000;
+            color: #cfe8ff;
+        }
+
+        #box {
+            width: 300px;
+            height: 200px;
+            margin: 20px auto;
+            background-color: #0d1220;
+            border: 1px solid #1c2a44;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Big heading at the top of the page -->
+    <h1>Reaction Time Test</h1>
+
+    <!-- The box you click. id="box" lets JavaScript find it -->
+    <div id="box">
+        <!-- Text inside the box -->
+        <p>Click to start</p>
+    </div>
+
+    <!-- Empty for now. JavaScript will put the reaction time here -->
+    <p id="result"></p>
+        <script>        // Holds Javascript
+        // Find the box and the result spot on the page
+        const box = document.getElementById("box");     //const box = creates a variable named box, a labeled container that holds something. const means the label always points to the same thing //document.getElementById("box"): document is your whole page, and this means “find the element with id="box".” This is why you gave it an id.
+        const result = document.getElementById("result");  
+
+        // Which mode the box is in: "waiting", "ready", or "go"
+        let state = "waiting";
+        //the moment the box glows
+        let startTime;
+        //The countdown to the glow, saved so we can cancel it
+        let timer;
+        //all the reaction times from this set
+        let times = [];
+
+        box.addEventListener("click", function () {    //box.addEventListener("click", function () { … }) means “when the box is clicked, run the code inside { }.” The click is the event, and this code listens for it.
+            if (state === "waiting") {
+                // start the round: turn violet and wait
+                state = "ready";
+                box.style.backgroundColor = "#1f1840";
+                box.textContent = "wait for the mysterious glow. . .";
+
+                // random wait beween 1 and 3 seconds
+                const delay = 1000 + Math.random() * 2000;
+
+                timer = setTimeout(function () {
+                    //times up: glow, start clock
+                    state = "go";
+                    box.style.backgroundColor = "#00b4ff";
+                    box.style.boxShadow = "0 0 40px #00b4ff, 0 0 80px rgba(0, 180, 255, 0.4)";
+                    box.textContent = "CLICK!";
+                    startTime = Date.now();
+                }, delay);
+
+            } else if (state === "ready") {
+                // Clicked before the glow; cancel the countdown
+                clearTimeout(timer);
+
+                //reset and warn
+                state = "waiting";
+                box.style.backgroundColor = "#0d1220";
+                box.textContent = "Too soon. Click to try again";
+                result.textContent = "";
+
+            } else if (state === "go") {
+                // stop the clock and show the time
+                const reactionTime = Date.now() - startTime;
+                //add this time to the list
+                times.push(reactionTime);
+                result.textContent = "Try " + times.length + " of 5: " + reactionTime + " ms";
+                
+                //after 5 tries, show the average
+                if (times.length === 5) {
+                    let total = 0;
+                    for (const t of times) {
+                        total += t;
+                    }
+                    const average = Math.round(total / times.length);
+                    result.textContent = "Average of 5: " + average + " ms";
+
+                    //empty the list for a new set
+                    times = [];
+                }
+
+                // Reset for the next try
+                state = "waiting";
+                box.style.backgroundColor = "#0d1220";
+                box.style.boxShadow = "";
+                box.textContent = "Click to start";
+            }
+        });     //; ends each instruction
+    </script>
+</body>
+</html>
